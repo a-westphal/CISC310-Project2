@@ -4,6 +4,17 @@
 #include <vector>
 #include <stdio.h>
 #include <string.h>
+#include <dirent.h>
+
+/*void read_directory(const std::string& name, stringvec& v)
+{
+    DIR* dirp = opendir(name.c_str());
+    struct dirent * dp;
+    while ((dp = readdir(dirp)) != NULL) {
+        v.push_back(dp->d_name);
+    }
+    closedir(dirp);
+}*/
  
 std::vector<std::string> splitString(std::string text, char d);
 std::string getFullPath(std::string cmd, const std::vector<std::string>& os_path_list);
@@ -23,14 +34,17 @@ int main (int argc, char **argv)
         int num_print = 0;
 
         std::getline (std::cin,input);
-        std::ifstream hist_file ("history.txt");
+        //std::ifstream hist_file ("history.txt");
         std::string line; 
 
         //ends the history loop
         bool end = false;
+
+		if(input == ""){ //Blank command
+		}
     
         //if the input includes "history": 
-        if(input.find("history") >= 0 && input.find("history") <= input.length())
+        else if(input.find("history") >= 0 && input.find("history") <= input.length())
         {
             //to parse the input: 
             std::string space = " ";    
@@ -70,14 +84,14 @@ int main (int argc, char **argv)
             {
                 int count = 1;
                 //wasn't changed by the history input, print everything up until 128
-                if(hist_file.is_open())
+               /* if(hist_file.is_open())
                 {
                     while(getline (hist_file,line))
                     {
                         std::cout << count << ": " << line << std::endl;
                         ++count; 
                     }
-                }   
+                } */  
             }
 
             else if(num_print > 0 && !end)
@@ -97,18 +111,51 @@ int main (int argc, char **argv)
         //  If no, print error statement: "<command_name>: Error running command" (do include newline)
 
         //if the input is "exit": 
-        if(input.find("exit") >= 0 && input.find("exit") <= input.length())
+        else if(input.find("exit") >= 0 && input.find("exit") <= input.length())
         {
             //end the program and loop
             done = true;
-        }
+        } else {
 
-		char* currPath;
-		currPath = strtok(os_path,":");
-		while(currPath != NULL){
-			printf("%s\n", currPath);
-			currPath = strtok (NULL, ":");
+			char* currPath;
+			char* commands;
+			int spacePosition;
+
+			spacePosition = input.find(" ");
+			printf("%d is the position of the space\n", spacePosition);
+			std::string command;
+			std::string argument;
+
+			if(spacePosition > 0){ //Argument was passed with command
+				command = input.substr(0, spacePosition);
+				argument = input.substr(spacePosition + 1, input.length());
+			} else {
+				command = input;
+			}
+
+			std::cout << command << " is command.\n";
+			std::cout << argument << " is argument.\n";
+
+			currPath = strtok(os_path,":");
+			while(currPath != NULL){
+				printf("%s\n", currPath);
+				currPath = strtok (NULL, ":");
+
+				//DIR *d = opendir(currPath);
+				//struct dirent *dir;
+
+				//while((dir = readdir(d)) != NULL){
+					
+					//printf("%s\n", dir->d_name);
+					//if(dir->d_name == command){
+						//printf("Command found.\n");
+					//}	
+				//}
+
+			}
 		}
+
+		input = "";
     }
     return 0;
 }
