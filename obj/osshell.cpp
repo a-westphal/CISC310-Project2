@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <stdio.h>
+#include <string.h>
  
 std::vector<std::string> splitString(std::string text, char d);
 std::string getFullPath(std::string cmd, const std::vector<std::string>& os_path_list);
@@ -45,6 +47,13 @@ int main (int argc, char **argv)
             //end the program and loop
             done = true;
         }
+
+		char* currPath;
+		currPath = strtok(os_path,":");
+		while(currPath != NULL){
+			printf("%s\n", currPath);
+			currPath = strtok (NULL, ":");
+		}
     }
 
     return 0;
