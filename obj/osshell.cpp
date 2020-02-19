@@ -20,17 +20,72 @@ int main (int argc, char **argv)
     while(!done)
     {
         std::cout <<"osshell> ";
+        int num_print = 0;
+
         std::getline (std::cin,input);
+        std::ifstream hist_file ("history.txt");
+        std::string line; 
+
+        //ends the history loop
+        bool end = false;
     
         //if the input includes "history": 
         if(input.find("history") >= 0 && input.find("history") <= input.length())
         {
-            //the string history is here! 
-            std::cout << "The word history is in your input!" << std::endl;
-            for(int i = 0; i < input.length(); i ++)
+            //to parse the input: 
+            std::string space = " ";    
+
+            if(input.find(space) > 0 && input.find(space) < input.length())
             {
-                
+                //the index to start looking for ints or chars: 
+                int split = input.find(space);
+                std::string half = input.substr(split+1, (input.length() - split));
+
+                if(isalpha(half[0]))
+                {
+                    //letters
+                    if(half.find("clear") != 0)
+                    {
+                        //error?
+                        std::cout << "Error: history \"" << half << "\" command not found." <<std::endl;
+                        end = true;
+                    }
+                }
+
+                else if(isdigit(half[0]) || half[0] == '-')
+                {
+                    //numbers
+                    num_print = stoi(half);
+                    std::cout << "numprint: " << num_print << std::endl;
+                    if(num_print < 0)
+                    {
+                        //error
+                        std::cout << "Error: history must have greater than 0 commands to print: " << num_print << std::endl;
+                        end = true;
+                    }
+                }
             }
+
+            if(num_print == 0 && !end)
+            {
+                int count = 1;
+                //wasn't changed by the history input, print everything up until 128
+                if(hist_file.is_open())
+                {
+                    while(getline (hist_file,line))
+                    {
+                        std::cout << count << ": " << line << std::endl;
+                        ++count; 
+                    }
+                }   
+            }
+
+            else if(num_print > 0 && !end)
+            {
+                //print num_print times 
+            }
+
+            //add history to the end after history is printed
         }
         // Repeat:
         //  Print prompt for user input: "osshell> " (no newline)
@@ -55,8 +110,6 @@ int main (int argc, char **argv)
 			currPath = strtok (NULL, ":");
 		}
     }
-
-    return 0;
     return 0;
 }
 
