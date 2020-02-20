@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <dirent.h>
+#include <unistd.h>
 
 /*void read_directory(const std::string& name, stringvec& v)
 {
@@ -136,22 +137,31 @@ int main (int argc, char **argv)
 			std::cout << command << " is command.\n";
 			std::cout << argument << " is argument.\n";
 
+			std::cout << os_path << "\n";
+
 			currPath = strtok(os_path,":");
 			while(currPath != NULL){
 				printf("%s\n", currPath);
+
+				DIR *dir;
+				struct dirent *d;
+				if((dir = opendir(currPath)) != NULL){
+					while ((d = readdir(dir)) != NULL){
+						//printf("%s\n", d->d_name);
+						if(strcmp(d->d_name, command.c_str()) == 0){
+							printf("Match has been found.\n");
+
+
+
+
+
+							//pid_t child = fork();
+							//execv(d->d_name + "/" + command);
+						}	
+					}
+				}
+				closedir (dir);
 				currPath = strtok (NULL, ":");
-
-				//DIR *d = opendir(currPath);
-				//struct dirent *dir;
-
-				//while((dir = readdir(d)) != NULL){
-					
-					//printf("%s\n", dir->d_name);
-					//if(dir->d_name == command){
-						//printf("Command found.\n");
-					//}	
-				//}
-
 			}
 		}
 
