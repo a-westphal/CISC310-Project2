@@ -6,6 +6,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <fstream>
 
 /*void read_directory(const std::string& name, stringvec& v)
 {
@@ -35,8 +36,17 @@ int main (int argc, char **argv)
         int num_print = 0;
 
         std::getline (std::cin,input);
-        //std::ifstream hist_file ("history.txt");
+        std::fstream hist_file;
+        hist_file.open("history.txt", std::fstream::in | std::fstream::out | std::fstream::app);
+
+        int line_count = 0;
         std::string line; 
+        while(std::getline(hist_file,line))
+        {
+        	line_count++;
+        }
+        hist_file.clear();
+
 
         //ends the history loop
         bool end = false;
@@ -65,6 +75,12 @@ int main (int argc, char **argv)
                         std::cout << "Error: history \"" << half << "\" command not found." <<std::endl;
                         end = true;
                     }
+
+                    //otherwise we want to clear the history:
+                    else
+                    {
+
+                    }
                 }
 
                 else if(isdigit(half[0]) || half[0] == '-')
@@ -84,20 +100,44 @@ int main (int argc, char **argv)
             if(num_print == 0 && !end)
             {
                 int count = 1;
+
+                //reset the file pointer: 
+                hist_file.seekg(0);
                 //wasn't changed by the history input, print everything up until 128
-               /* if(hist_file.is_open())
+                if(hist_file.is_open())
                 {
-                    while(getline (hist_file,line))
+                    while(getline (hist_file,line) && count < 129)
                     {
                         std::cout << count << ": " << line << std::endl;
                         ++count; 
                     }
-                } */  
+                }   
+
+                //to add onto the end of the 
+                hist_file << input; 
             }
 
             else if(num_print > 0 && !end)
             {
-                //print num_print times 
+            	//print num_print times
+                int counter = 1;
+                hist_file.seekg(0);
+                if(hist_file.is_open())
+                {
+                	std::cout <<"in if"<<std::endl;
+                    while(getline (hist_file,line) && counter < 129)
+                    {
+                       if(counter > (line_count - num_print))
+                       {
+                       		std::cout << counter <<": " <<line << std::endl;
+                       } 
+                       counter ++;
+                    }
+                }
+
+                //to add onto the end of the file:
+                std::cout << "input: " <<input <<std::endl;
+                hist_file << input <<std::endl; 
             }
 
             //add history to the end after history is printed
