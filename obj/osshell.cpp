@@ -18,6 +18,7 @@
     closedir(dirp);
 }*/
  
+void addToFile (std::string array[128], std::string input,bool clear);
 std::vector<std::string> splitString(std::string text, char d);
 std::string getFullPath(std::string cmd, const std::vector<std::string>& os_path_list);
 bool fileExists(std::string full_path, bool *executable);
@@ -36,20 +37,27 @@ int main (int argc, char **argv)
         int num_print = 0;
 
         std::getline (std::cin,input);
-        std::fstream hist_file;
-        hist_file.open("history.txt", std::fstream::in | std::fstream::out | std::fstream::app);
+        std::ifstream hist_file;
+        hist_file.open("history.txt", std::fstream::in);
 
         int line_count = 0;
         std::string line; 
+        std::string hist_arr[128];
+
         while(std::getline(hist_file,line))
         {
+        	if(line_count < 128)
+        	{
+        		hist_arr[line_count] = line;
+        	}
         	line_count++;
         }
-        hist_file.clear();
-
+        hist_file.close();
 
         //ends the history loop
         bool end = false;
+        //makes sure we don't call addToFile() twice
+        bool print = false;
 
 		if(input == ""){ //Blank command
 		}
@@ -79,7 +87,9 @@ int main (int argc, char **argv)
                     //otherwise we want to clear the history:
                     else
                     {
-
+                    	end = true;
+                    	print = true;
+                    	addToFile(hist_arr,input,true);
                     }
                 }
 
@@ -87,7 +97,6 @@ int main (int argc, char **argv)
                 {
                     //numbers
                     num_print = stoi(half);
-                    std::cout << "numprint: " << num_print << std::endl;
                     if(num_print < 0)
                     {
                         //error
@@ -99,49 +108,44 @@ int main (int argc, char **argv)
 
             if(num_print == 0 && !end)
             {
-                int count = 1;
-
-                //reset the file pointer: 
-                hist_file.seekg(0);
-                //wasn't changed by the history input, print everything up until 128
-                if(hist_file.is_open())
+            	int count = 0;
+                while(hist_arr[count]!= "" && count < 128)
                 {
-                    while(getline (hist_file,line) && count < 129)
-                    {
-                        std::cout << count << ": " << line << std::endl;
-                        ++count; 
-                    }
-                }   
-
-                //to add onto the end of the 
-                hist_file << input; 
+                	std::cout << count + 1 << ": " <<hist_arr[count] << std::endl;
+                	count ++;
+                } 
             }
 
             else if(num_print > 0 && !end)
             {
             	//print num_print times
-                int counter = 1;
-                hist_file.seekg(0);
-                if(hist_file.is_open())
+                int counter = 0;
+                int find = 0;
+                bool finder = false;
+
+                //find the last filled in index:
+                while (!finder && find < 128)
                 {
-                	std::cout <<"in if"<<std::endl;
-                    while(getline (hist_file,line) && counter < 129)
-                    {
-                       if(counter > (line_count - num_print))
-                       {
-                       		std::cout << counter <<": " <<line << std::endl;
-                       } 
-                       counter ++;
-                    }
+                	if(hist_arr[find].compare("") == 0)
+                	{
+
+                		finder = true;
+                	}
+                	find++;
                 }
-
-                //to add onto the end of the file:
-                std::cout << "input: " <<input <<std::endl;
-                hist_file << input <<std::endl; 
-            }
-
+                while(counter < find -1)
+                {
+                    if(counter >= ((find-1) - num_print))
+                    {
+                       	std::cout << counter +1 <<": " <<hist_arr[counter] << std::endl;
+                    } 
+                    counter ++;
+                }
+            } 
             //add history to the end after history is printed
-        }
+            if(!print)
+            {	addToFile(hist_arr,input,false); }
+       	}
         // Repeat:
         //  Print prompt for user input: "osshell> " (no newline)
         //  Get user input for next command
@@ -156,6 +160,7 @@ int main (int argc, char **argv)
         {
             //end the program and loop
             done = true;
+            addToFile(hist_arr,input,false);
         } else {
 
 			char* currPath;
@@ -208,6 +213,44 @@ int main (int argc, char **argv)
 		input = "";
     }
     return 0;
+}
+
+void addToFile (std::string array[128],std::string input, bool clear)
+{
+	std::ofstream hist_out;
+    hist_out.open("history.txt", std::ofstream::out);
+
+    if(hist_out.is_open() && clear == true)
+    {
+    	hist_out << "";  
+    	hist_out.close();
+    	/*int count = 0;  
+    	while(count < 128)
+    	{
+    		array[count] ="";
+    		count ++;
+    	}    */   
+    }
+    else if(hist_out.is_open() && clear == false)
+    {
+	    int out_count = 0;
+	    bool out = false;
+	    while(!out)
+	    {
+		    if(array[out_count].compare("")==0)
+		   	{
+		       	//don't submit to history file
+		       	out = true;
+		       	hist_out << input << "\n";
+		    }
+		    else
+		    {
+		       	hist_out << array[out_count]<<"\n";
+		    }
+	       	out_count++;
+	    }
+	    hist_out.close();
+	}
 }
 
 // Returns vector of strings created by splitting `text` on every occurance of `d`
