@@ -177,12 +177,12 @@ int main (int argc, char **argv)
 				command = input.substr(0, spacePosition);
 				argument = input.substr(spacePosition + 1, input.length());
 				char* argv[2];
-				argv[0] = command.c_str();
-				argv[1] = argument.c_str();
+				argv[0] = const_cast<char*>(command.c_str());
+				argv[1] = const_cast<char*>(argument.c_str());
 			} else {
 				command = input;
 				char* argv[1];
-				argv[0] = command.c_str();
+				argv[0] = const_cast<char*>(command.c_str());
 			}
 
 			std::cout << command << " is command.\n";
