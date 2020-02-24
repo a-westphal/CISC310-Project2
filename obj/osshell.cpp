@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 /*void read_directory(const std::string& name, stringvec& v)
 {
@@ -165,7 +166,7 @@ int main (int argc, char **argv)
         } else {
 
 			char* currPath;
-			char* commands;
+			//char* commands;
 			int spacePosition;
 
 			spacePosition = input.find(" ");
@@ -176,14 +177,10 @@ int main (int argc, char **argv)
 			if(spacePosition > 0){ //Argument was passed with command
 				command = input.substr(0, spacePosition);
 				argument = input.substr(spacePosition + 1, input.length());
-				char* argv[2];
 
-				argv[0] = const_cast<char*>(command.c_str());
-				argv[1] = const_cast<char*>(argument.c_str());
+				//argv[0] = const_cast<char*>(argument.c_str());
 			} else {
 				command = input;
-				char* argv[1];
-				argv[0] = const_cast<char*>(command.c_str());
 			}
 
 			std::cout << command << " is command.\n";
@@ -194,7 +191,7 @@ int main (int argc, char **argv)
 
 			currPath = strtok(os_path,":");
 			while(currPath != NULL){
-				printf("%s\n", currPath);
+				//printf("%s\n", currPath);
 
 				DIR *dir;
 				struct dirent *d;
@@ -208,10 +205,17 @@ int main (int argc, char **argv)
 
 							char *buf = strcat(currPath, "/");
 
-							printf("%s is the command.\n", strcat(buf, command.c_str()));
-							pid_t child = fork();
-							if(child == 0){
-								execv(strcat(buf, command.c_str()), argv);
+							printf("%s is command.\n", command.c_str());
+
+							char *const args[] = {strcat(buf, command.c_str()), const_cast<char*>(argument.c_str()), NULL};
+
+							printf("%s is the command.\n", buf);
+
+							pid_t pid;
+							if(pid = fork() == 0){
+								execv(buf, args);
+							} else {
+								wait(NULL);
 							}
 						}	
 					}
