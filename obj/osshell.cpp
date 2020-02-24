@@ -176,14 +176,20 @@ int main (int argc, char **argv)
 			if(spacePosition > 0){ //Argument was passed with command
 				command = input.substr(0, spacePosition);
 				argument = input.substr(spacePosition + 1, input.length());
+				char* argv[2];
+				argv[0] = command.c_str();
+				argv[1] = argument.c_str();
 			} else {
 				command = input;
+				char* argv[1];
+				argv[0] = command.c_str();
 			}
 
 			std::cout << command << " is command.\n";
 			std::cout << argument << " is argument.\n";
 
 			std::cout << os_path << "\n";
+
 
 			currPath = strtok(os_path,":");
 			while(currPath != NULL){
@@ -202,7 +208,10 @@ int main (int argc, char **argv)
 							char *buf = strcat(currPath, "/");
 
 							printf("%s is the command.\n", strcat(buf, command.c_str()));
-							//execv(d->d_name + "/" + command.c_str());
+							pid_t child = fork();
+							if(child == 0){
+								execv(strcat(buf, command.c_str()), argv);
+							}
 						}	
 					}
 				}
