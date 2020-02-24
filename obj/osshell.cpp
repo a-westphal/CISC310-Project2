@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fstream>
+#include <sys/types.h>
 
 /*void read_directory(const std::string& name, stringvec& v)
 {
@@ -168,7 +169,7 @@ int main (int argc, char **argv)
 			int spacePosition;
 
 			spacePosition = input.find(" ");
-			printf("%d is the position of the space\n", spacePosition);
+			//printf("%d is the position of the space\n", spacePosition);
 			std::string command;
 			std::string argument;
 
@@ -196,12 +197,12 @@ int main (int argc, char **argv)
 						if(strcmp(d->d_name, command.c_str()) == 0){
 							printf("Match has been found.\n");
 
-
-
-
-
 							//pid_t child = fork();
-							//execv(d->d_name + "/" + command);
+
+							char *buf = strcat(currPath, "/");
+
+							printf("%s is the command.\n", strcat(buf, command.c_str()));
+							//execv(d->d_name + "/" + command.c_str());
 						}	
 					}
 				}
