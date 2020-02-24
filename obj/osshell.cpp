@@ -183,10 +183,10 @@ int main (int argc, char **argv)
 				command = input;
 			}
 
-			std::cout << command << " is command.\n";
-			std::cout << argument << " is argument.\n";
+			//std::cout << command << " is command.\n";
+			//std::cout << argument << " is argument.\n";
 
-			std::cout << os_path << "\n";
+			//std::cout << os_path << "\n";
 
 
 			currPath = strtok(os_path,":");
@@ -197,19 +197,10 @@ int main (int argc, char **argv)
 				struct dirent *d;
 				if((dir = opendir(currPath)) != NULL){
 					while ((d = readdir(dir)) != NULL){
-						//printf("%s\n", d->d_name);
 						if(strcmp(d->d_name, command.c_str()) == 0){
-							printf("Match has been found.\n");
-
-							//pid_t child = fork();
 
 							char *buf = strcat(currPath, "/");
-
-							printf("%s is command.\n", command.c_str());
-
 							char *const args[] = {strcat(buf, command.c_str()), const_cast<char*>(argument.c_str()), NULL};
-
-							printf("%s is the command.\n", buf);
 
 							pid_t pid;
 							if(pid = fork() == 0){
@@ -223,6 +214,7 @@ int main (int argc, char **argv)
 				closedir (dir);
 				currPath = strtok (NULL, ":");
 			}
+			currPath = strtok(os_path, ":");
 		}
 
 		input = "";
