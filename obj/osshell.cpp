@@ -209,6 +209,7 @@ int main (int argc, char **argv)
 
 							pid_t pid;
 							if(pid = fork() == 0){
+								addToFile(hist_arr,input,false);
 								execv(buf, args);
 							} else {
 								wait(NULL);
