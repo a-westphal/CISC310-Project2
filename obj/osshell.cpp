@@ -148,11 +148,6 @@ int main (int argc, char **argv)
             if(!print)
             {	addToFile(hist_arr,input,false); }
        	}
-        // Repeat:
-        //  Print prompt for user input: "osshell> " (no newline)
-        //  Get user input for next command
-        //  If command is `exit` exit loop / quit program
-        //  If command is `history` print previous N commands
         //  For all other commands, check if an executable by that name is in one of the PATH directories
         //  If yes, execute it
         //  If no, print error statement: "<command_name>: Error running command" (do include newline)
@@ -164,13 +159,10 @@ int main (int argc, char **argv)
             done = true;
             addToFile(hist_arr,input,false);
         } else {
-
 			char* currPath;
-			//char* commands;
 			int spacePosition;
 
 			spacePosition = input.find(" ");
-			//printf("%d is the position of the space\n", spacePosition);
 			std::string command;
 			std::string argument;
 
@@ -183,23 +175,36 @@ int main (int argc, char **argv)
 				command = input;
 			}
 
-			//std::cout << command << " is command.\n";
-			//std::cout << argument << " is argument.\n";
+			//If full file is found.
+			if(FILE *file = fopen(command.c_str(), "r")){
+		
+				printf("Unique command being reached.\n");
+				
+				char *const args[] = {const_cast<char*>(command.c_str()), const_cast<char*>(argument.c_str()), NULL};
+				pid_t pid;
+				if(pid = fork() == 0){
+					execv(command.c_str(), args);
+				} else {
+					wait(NULL);
+				}
+			}
 
-			//std::cout << os_path << "\n";
-
-
-			currPath = strtok(os_path,":");
+			char *os_copy = (char *) malloc(256);
+			strcpy(os_copy, os_path);
+			currPath = strtok(os_copy, ":");
 			while(currPath != NULL){
 				//printf("%s\n", currPath);
 
 				DIR *dir;
 				struct dirent *d;
+	
 				if((dir = opendir(currPath)) != NULL){
 					while ((d = readdir(dir)) != NULL){
 						if(strcmp(d->d_name, command.c_str()) == 0){
 
 							char *buf = strcat(currPath, "/");
+
+							printf("%ld is argument length.\n",strlen(argument.c_str()));
 							char *const args[] = {strcat(buf, command.c_str()), const_cast<char*>(argument.c_str()), NULL};
 
 							pid_t pid;
@@ -214,9 +219,7 @@ int main (int argc, char **argv)
 				closedir (dir);
 				currPath = strtok (NULL, ":");
 			}
-			currPath = strtok(os_path, ":");
 		}
-
 		input = "";
     }
     return 0;
