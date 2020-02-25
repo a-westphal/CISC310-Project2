@@ -175,17 +175,32 @@ int main (int argc, char **argv)
 				command = input;
 			}
 
+
+			int wasExecuted = 0;
 			//If full file is found.
 			if(FILE *file = fopen(command.c_str(), "r")){
-		
-				printf("Unique command being reached.\n");
 				
-				char *const args[] = {const_cast<char*>(command.c_str()), const_cast<char*>(argument.c_str()), NULL};
-				pid_t pid;
-				if(pid = fork() == 0){
-					execv(command.c_str(), args);
+				if(strlen(argument.c_str()) > 0){
+					char *const args[] = {const_cast<char*>(command.c_str()), const_cast<char*>(argument.c_str()), NULL};
+					pid_t pid;
+					wasExecuted = 1;
+					if(pid = fork() == 0){
+						addToFile(hist_arr,input,false);
+						execv(command.c_str(), args);
+					} else {
+						wait(NULL);
+					}
 				} else {
-					wait(NULL);
+					char *const args2[] = {const_cast<char*>(command.c_str()), NULL};
+					pid_t pid;
+					wasExecuted = 1;
+					if(pid = fork() == 0){
+						addToFile(hist_arr,input,false);
+	
+						execv(command.c_str(), args2);
+					} else {
+						wait(NULL);
+					}
 				}
 			}
 
@@ -197,6 +212,7 @@ int main (int argc, char **argv)
 
 				DIR *dir;
 				struct dirent *d;
+
 	
 				if((dir = opendir(currPath)) != NULL){
 					while ((d = readdir(dir)) != NULL){
@@ -205,21 +221,42 @@ int main (int argc, char **argv)
 							char *buf = strcat(currPath, "/");
 
 							printf("%ld is argument length.\n",strlen(argument.c_str()));
-							char *const args[] = {strcat(buf, command.c_str()), const_cast<char*>(argument.c_str()), NULL};
-
-							pid_t pid;
-							if(pid = fork() == 0){
-								addToFile(hist_arr,input,false);
-								execv(buf, args);
-							} else {
-								wait(NULL);
+							if(strlen(argument.c_str()) > 0){
+								char *const args[] = {strcat(buf, command.c_str()), const_cast<char*>(argument.c_str()), NULL};
+								pid_t pid;
+								wasExecuted = 1;
+								if(pid = fork() == 0){
+									addToFile(hist_arr,input,false);
+									
+									execv(buf, args);
+								} else {
+									wait(NULL);
+								}
+							} else{
+								char *const args2[] = {const_cast<char*>(command.c_str()), NULL};
+								pid_t pid;
+								wasExecuted = 1;
+								if(pid = fork() == 0){
+									addToFile(hist_arr,input,false);
+									strcat(buf, command.c_str());
+									printf("%s, is buf\n", buf);
+									execv(buf, args2);
+								} else {
+									wait(NULL);
+								}
 							}
+			
+
 						}	
 					}
 				}
 				closedir (dir);
 				currPath = strtok (NULL, ":");
 			}
+			if(input != "" && wasExecuted == 0){
+				printf("<%s>: Error running command\n", command.c_str());
+			}
+			wasExecuted = 0;
 		}
 		input = "";
     }
