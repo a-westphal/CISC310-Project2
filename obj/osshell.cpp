@@ -148,9 +148,6 @@ int main (int argc, char **argv)
             if(!print)
             {	addToFile(hist_arr,input,false); }
        	}
-        //  For all other commands, check if an executable by that name is in one of the PATH directories
-        //  If yes, execute it
-        //  If no, print error statement: "<command_name>: Error running command" (do include newline)
 
         //if the input is "exit": 
         else if(input.find("exit") >= 0 && input.find("exit") <= input.length())
@@ -169,8 +166,6 @@ int main (int argc, char **argv)
 			if(spacePosition > 0){ //Argument was passed with command
 				command = input.substr(0, spacePosition);
 				argument = input.substr(spacePosition + 1, input.length());
-
-				//argv[0] = const_cast<char*>(argument.c_str());
 			} else {
 				command = input;
 			}
@@ -208,7 +203,6 @@ int main (int argc, char **argv)
 			strcpy(os_copy, os_path);
 			currPath = strtok(os_copy, ":");
 			while(currPath != NULL){
-				//printf("%s\n", currPath);
 
 				DIR *dir;
 				struct dirent *d;
@@ -219,8 +213,6 @@ int main (int argc, char **argv)
 						if(strcmp(d->d_name, command.c_str()) == 0){
 
 							char *buf = strcat(currPath, "/");
-
-							printf("%ld is argument length.\n",strlen(argument.c_str()));
 							if(strlen(argument.c_str()) > 0){
 								char *const args[] = {strcat(buf, command.c_str()), const_cast<char*>(argument.c_str()), NULL};
 								pid_t pid;
