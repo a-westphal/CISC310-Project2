@@ -90,6 +90,15 @@ int main (int argc, char **argv)
                 {
                     //numbers
                     num_print = stoi(half);
+                    for(int i = 0; i < half.length(); i++)
+                    {
+                    	if(isalpha(half[i])==0)
+                    	{
+
+                    		std::cout<< "Error: history expects an integer > 0" <<std::endl;
+                    		end = true;
+                    	}
+                    }
                     if(num_print < 0)
                     {
                         //error
@@ -130,7 +139,7 @@ int main (int argc, char **argv)
                 {
                     if(counter >= ((find-1) - num_print))
                     {
-                       	std::cout << ' ' << ' ' << ' ' << counter +1 <<": " <<hist_arr[counter] << std::endl;
+                       	std::cout << "  " <<counter +1 <<": " <<hist_arr[counter] << std::endl;
                     } 
                     counter ++;
                 }
