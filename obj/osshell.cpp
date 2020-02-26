@@ -104,7 +104,7 @@ int main (int argc, char **argv)
             	int count = 0;
                 while(hist_arr[count]!= "" && count < 128)
                 {
-                	std::cout << count + 1 << ": " <<hist_arr[count] << std::endl;
+                	std::cout << ' ' << ' ' << count + 1 << ": " <<hist_arr[count] << std::endl;
                 	count ++;
                 } 
             }
@@ -130,7 +130,7 @@ int main (int argc, char **argv)
                 {
                     if(counter >= ((find-1) - num_print))
                     {
-                       	std::cout << counter +1 <<": " <<hist_arr[counter] << std::endl;
+                       	std::cout << ' ' << ' ' << ' ' << counter +1 <<": " <<hist_arr[counter] << std::endl;
                     } 
                     counter ++;
                 }
@@ -271,6 +271,7 @@ int main (int argc, char **argv)
 				currPath = strtok (NULL, ":");
 			}
 			if(input != "" && wasExecuted == 0){
+				addToFile(hist_arr, input, false);
 				printf("%s: Error running command\n", command.c_str());
 			}
 			wasExecuted = 0;
