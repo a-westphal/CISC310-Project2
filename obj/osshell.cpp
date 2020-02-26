@@ -92,11 +92,12 @@ int main (int argc, char **argv)
                     num_print = stoi(half);
                     for(int i = 0; i < half.length(); i++)
                     {
-                    	if(isalpha(half[i])==0)
+                    	if(isalpha(half[i]))
                     	{
 
                     		std::cout<< "Error: history expects an integer > 0 (or 'clear')" <<std::endl;
                     		end = true;
+                    		num_print = 0;
                     	}
                     }
                     if(num_print < 0)
