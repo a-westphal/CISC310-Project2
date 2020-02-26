@@ -1,0 +1,4 @@
+which grep
+exit
+history
+cd ..
