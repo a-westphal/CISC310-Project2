@@ -95,7 +95,7 @@ int main (int argc, char **argv)
                     	if(isalpha(half[i])==0)
                     	{
 
-                    		std::cout<< "Error: history expects an integer > 0" <<std::endl;
+                    		std::cout<< "Error: history expects an integer > 0 (or 'clear')" <<std::endl;
                     		end = true;
                     	}
                     }
@@ -225,9 +225,19 @@ int main (int argc, char **argv)
 			for(int i = 0; i < mySpace + 2; i ++){
 				params[i] = (char *)malloc(256);
 			}
-	
+
+			char c = '"';
+
 			for(int i = 1; i < mySpace + 1; i++){
 				strcpy(params[i], input.substr(redSpaces[i-1] + 1, (redSpaces[i] - 1) - redSpaces[i-1]).c_str());
+				char *pw = params[i];
+				char *pr = params[i];
+				while(*pr){
+					*pw = *pr++;
+					pw += (*pw != c);					
+				}
+				*pw = '\0';
+				//params[i].erase(std::remove(
 			}
 			params[mySpace + 1] = NULL;
 
