@@ -9,17 +9,8 @@
 #include <fstream>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <algorithm>
 
-/*void read_directory(const std::string& name, stringvec& v)
-{
-    DIR* dirp = opendir(name.c_str());
-    struct dirent * dp;
-    while ((dp = readdir(dirp)) != NULL) {
-        v.push_back(dp->d_name);
-    }
-    closedir(dirp);
-}*/
- 
 void addToFile (std::string array[128], std::string input,bool clear);
 std::vector<std::string> splitString(std::string text, char d);
 std::string getFullPath(std::string cmd, const std::vector<std::string>& os_path_list);
@@ -171,32 +162,81 @@ int main (int argc, char **argv)
 			}
 
 
+			size_t n = std::count(input.begin(), input.end(), '"');
+			size_t space = std::count(input.begin(), input.end(), ' ');
+			int quotes[n];
+
+			int o = 0;
+			for(int i = 0; i < input.length(); i ++){
+				if(input[i] == '"'){
+					quotes[o] = i;
+					o++;
+				}
+			}
+
+			int spaces[space];
+
+			o = 0;
+			for(int i = 0; i < input.length(); i ++){
+				if(isspace(input[i])){
+					spaces[o] = i;
+					o++;
+				}
+			}
+
+			for(int i = 0; i < sizeof(spaces)/4; i ++){
+
+				for(int j = 0; j < sizeof(quotes)/4; j++){
+					
+					if(spaces[i] > quotes[j] && spaces[i] < quotes[j+1]){
+						spaces[i] = -1;
+						space--;
+					}
+					j++;
+				}
+			}
+			int redSpaces[space];
+
+			o = 0;
+			for(int i = 0; i < sizeof(spaces)/4; i ++){
+		
+				if(spaces[i] != -1){
+					redSpaces[o] = spaces[i];
+					o++;
+				}
+			}
+
+			int mySpace = space;
+
+			char *params[mySpace + 2];
+
+			params[0] = const_cast<char*>(input.substr(0, redSpaces[0]).c_str());
+			char *temp = (char *) malloc(256);
+
+			for(int i = 0; i < mySpace + 2; i ++){
+				params[i] = (char *)malloc(256);
+			}
+	
+			for(int i = 1; i < mySpace + 1; i++){
+				strcpy(params[i], input.substr(redSpaces[i-1] + 1, (redSpaces[i] - 1) - redSpaces[i-1]).c_str());
+			}
+			params[mySpace + 1] = NULL;
+
 			int wasExecuted = 0;
+
 			//If full file is found.
 			if(FILE *file = fopen(command.c_str(), "r")){
 				
-				if(strlen(argument.c_str()) > 0){
-					char *const args[] = {const_cast<char*>(command.c_str()), const_cast<char*>(argument.c_str()), NULL};
-					pid_t pid;
-					wasExecuted = 1;
-					if(pid = fork() == 0){
-						addToFile(hist_arr,input,false);
-						execv(command.c_str(), args);
-					} else {
-						wait(NULL);
-					}
-				} else {
-					char *const args2[] = {const_cast<char*>(command.c_str()), NULL};
-					pid_t pid;
-					wasExecuted = 1;
-					if(pid = fork() == 0){
-						addToFile(hist_arr,input,false);
-	
-						execv(command.c_str(), args2);
-					} else {
-						wait(NULL);
-					}
+				params[0] = const_cast<char*>(command.c_str());
+				pid_t pid;
+				wasExecuted = 1;
+				if(pid = fork() == 0){
+					addToFile(hist_arr, input, false);
+					execv(const_cast<char*>(command.c_str()), params);
+				}else{
+					wait(NULL);
 				}
+
 			}
 
 			char *os_copy = (char *) malloc(256);
@@ -207,38 +247,23 @@ int main (int argc, char **argv)
 				DIR *dir;
 				struct dirent *d;
 
-	
 				if((dir = opendir(currPath)) != NULL){
 					while ((d = readdir(dir)) != NULL){
 						if(strcmp(d->d_name, command.c_str()) == 0){
 
 							char *buf = strcat(currPath, "/");
-							if(strlen(argument.c_str()) > 0){
-								char *const args[] = {strcat(buf, command.c_str()), const_cast<char*>(argument.c_str()), NULL};
-								pid_t pid;
-								wasExecuted = 1;
-								if(pid = fork() == 0){
-									addToFile(hist_arr,input,false);
-									
-									execv(buf, args);
-								} else {
-									wait(NULL);
-								}
-							} else{
-								char *const args2[] = {const_cast<char*>(command.c_str()), NULL};
-								pid_t pid;
-								wasExecuted = 1;
-								if(pid = fork() == 0){
-									addToFile(hist_arr,input,false);
-									strcat(buf, command.c_str());
-									printf("%s, is buf\n", buf);
-									execv(buf, args2);
-								} else {
-									wait(NULL);
-								}
-							}
-			
+							strcat(buf, command.c_str());
 
+							params[0] = buf;
+
+							pid_t pid;
+							wasExecuted = 1;
+							if(pid = fork() == 0){
+								addToFile(hist_arr,input,false);
+								execv(buf, params);
+							} else {
+								wait(NULL);
+							}
 						}	
 					}
 				}
@@ -246,7 +271,7 @@ int main (int argc, char **argv)
 				currPath = strtok (NULL, ":");
 			}
 			if(input != "" && wasExecuted == 0){
-				printf("<%s>: Error running command\n", command.c_str());
+				printf("%s: Error running command\n", command.c_str());
 			}
 			wasExecuted = 0;
 		}
